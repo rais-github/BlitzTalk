@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";
 import userRoute from "./routes/userRoute.js";
+import chatRoute from "./routes/chatRoute.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
   res.send("Welcome Home");
 });
 
+app.use("/api/chat", chatRoute);
 app.use("/api/user", userRoute);
 
 app.all("*", (req, res, next) => {

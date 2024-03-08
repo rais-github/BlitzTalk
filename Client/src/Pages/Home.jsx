@@ -35,7 +35,7 @@ const Home = () => {
         }}
       >
         <Typography variant="h3" fontFamily="Work Sans" color="white">
-          Talk-A-Tive
+          BlitzTalk
         </Typography>
       </Box>
       <Box

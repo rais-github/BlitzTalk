@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   FormControl,
@@ -6,14 +7,18 @@ import {
   Input,
   InputAdornment,
   IconButton,
+  Box,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { CloudUpload } from "@mui/icons-material";
-import { Box } from "@mui/system";
+import { Visibility, VisibilityOff, CloudUpload } from "@mui/icons-material";
+import CircularProgress from "@mui/material/CircularProgress";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const history = useNavigate();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,24 +32,120 @@ const Signup = () => {
     postDetails(file);
   };
 
-  const submitHandler = () => {
+  const submitHandler = async (e) => {
+    e.preventDefault();
     setPicLoading(true);
 
-    // Your form submission logic here
+    try {
+      if (!name || !email || !password || !confirmpassword) {
+        toast.warning("Please Fill all the Fields", {
+          position: toast.POSITION
+            ? toast.POSITION.BOTTOM_RIGHT
+            : "bottom-right",
 
-    setPicLoading(false);
+          autoClose: 4000,
+        });
+        setPicLoading(false);
+        return;
+      }
+      console.log(name, email, password);
+      if (password !== confirmpassword) {
+        toast.error("Passwords Do Not Match", {
+          position: toast.POSITION
+            ? toast.POSITION.BOTTOM_RIGHT
+            : "bottom-right",
+
+          autoClose: 5000,
+        });
+        setPicLoading(false);
+        return;
+      }
+
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+        },
+      };
+
+      const { data } = await axios.post(
+        "/api/user",
+        {
+          name,
+          email,
+          password,
+          pic,
+        },
+        config
+      );
+      console.log("data", data);
+      toast.success("Registration Successful", {
+        position: toast.POSITION ? toast.POSITION.BOTTOM_RIGHT : "bottom-right",
+
+        autoClose: 5000,
+      });
+
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setPicLoading(false);
+      history("/chats");
+    } catch (error) {
+      toast.error(
+        `Error Occurred: ${error.response?.data?.message || "Unknown error"}`,
+        {
+          position: toast.POSITION
+            ? toast.POSITION.BOTTOM_RIGHT
+            : "bottom-right",
+
+          autoClose: 5000,
+        }
+      );
+      setPicLoading(false);
+    }
   };
 
-  const postDetails = (pics) => {
+  const postDetails = async (pics) => {
     setPicLoading(true);
 
-    // Your file upload logic here
+    try {
+      if (pics && (pics.type === "image/jpeg" || pics.type === "image/png")) {
+        const formData = new FormData();
+        formData.append("file", pics);
+        formData.append("upload_preset", "ChatApp");
+        formData.append("cloud_name", "dgvy8j9np");
 
-    setPicLoading(false);
+        const response = await axios.post(
+          "https://api.cloudinary.com/v1_1/dgvy8j9np/image/upload",
+          formData
+        );
+
+        setPic(response.data.url);
+        console.log(response.data.url);
+        setPicLoading(false);
+
+        toast.success("File Uploaded Successfully", {
+          position: toast.POSITION
+            ? toast.POSITION.BOTTOM_RIGHT
+            : "bottom-right",
+
+          autoClose: 5000,
+        });
+      } else {
+        throw new Error("Invalid file format");
+      }
+    } catch (error) {
+      console.error("File upload failed:", error);
+      setPicLoading(false);
+
+      toast.error(`Error: ${error.message || "Unknown error"}`, {
+        position: toast.POSITION ? toast.POSITION.BOTTOM_RIGHT : "bottom-right",
+
+        autoClose: 5000,
+      });
+    }
   };
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
+      <ToastContainer />
       <FormControl fullWidth required>
         <FormLabel>Name</FormLabel>
         <Input
@@ -112,8 +213,13 @@ const Signup = () => {
         onClick={submitHandler}
         disabled={picLoading}
         style={{ marginTop: "15px" }}
+        type="submit"
       >
-        Sign Up
+        {picLoading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          "Sign Up"
+        )}
       </Button>
     </Box>
   );
