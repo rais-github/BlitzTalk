@@ -117,11 +117,133 @@ const createGroupChat = asyncHandler(async (req, res) => {
   }
 });
 
+//@description     Rename Group Chat
+//@route           POST /api/chat/rename
+//@access          Protected
+
+const renameGroup = asyncHandler(async (req, res, next) => {
+  try {
+    const { chatId, chatName } = req.body;
+    const userId = req.user._id;
+    const chat = await Chat.findById(chatId);
+    // console.log("admin", chat.groupAdmin);
+    // console.log("loggedIn", userId);
+    if (!chat) {
+      throw new ExpressError(404, "No Such Chat Available");
+    }
+
+    if (chat.groupAdmin.toString() !== userId.toString()) {
+      throw new ExpressError(403, "You are not authorized to rename the group");
+    }
+    const renamedGroup = await Chat.findByIdAndUpdate(
+      chatId,
+      { chatName },
+      { new: true }
+    )
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+
+    res.json(renamedGroup);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// @desc    Add user to Group
+// @route   PUT /api/chat/groupadd
+// @access  Protected
+
+const addToGroup = asyncHandler(async (req, res, next) => {
+  const { chatId, userId } = req.body;
+
+  try {
+    const loggedInUser = req.user._id;
+
+    const currentChat = await Chat.findById(chatId);
+
+    if (!currentChat) {
+      throw new ExpressError(404, "No Such Chat Available");
+    }
+
+    const groupAdministrator = currentChat.groupAdmin;
+
+    if (groupAdministrator.toString() !== loggedInUser.toString()) {
+      throw new ExpressError(
+        403,
+        "You are not authorized to add users to the group"
+      );
+    }
+
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      { $push: { users: userId } },
+      { new: true }
+    )
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+
+    if (!updatedChat) {
+      res.status(404);
+      throw new Error("Chat Not Found");
+    } else {
+      res.json(updatedChat);
+    }
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+    next(error);
+  }
+});
+
+// @desc    Remove User from group
+// @route   PUT /api/chat/groupremove
+// @access  Protected
+
+const removeFromGroup = asyncHandler(async (req, res, next) => {
+  const { chatId, userId } = req.body;
+
+  try {
+    const loggedInUser = req.user._id;
+
+    const currentChat = await Chat.findById(chatId);
+
+    if (!currentChat) {
+      throw new ExpressError(404, "No Such Chat Available");
+    }
+
+    const groupAdministrator = currentChat.groupAdmin;
+
+    if (groupAdministrator.toString() !== loggedInUser.toString()) {
+      throw new ExpressError(
+        403,
+        "You are not authorized to add users to the group"
+      );
+    }
+
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      { $pull: { users: userId } },
+      { new: true }
+    )
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+
+    if (!updatedChat) {
+      res.status(404);
+      throw new Error("Chat Not Found");
+    } else {
+      res.json(updatedChat);
+    }
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+    next(error);
+  }
+});
+
 export {
   accessChat,
   fetchChats,
   createGroupChat,
-  //   removeFromGroup,
-  //   addToGroup,
-  //   renameGroup,
+  removeFromGroup,
+  addToGroup,
+  renameGroup,
 };
