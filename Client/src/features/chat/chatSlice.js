@@ -16,7 +16,6 @@ export const chatSlice = createSlice({
       state.selectedChat = action.payload;
     },
     setUser: (state, action) => {
-      const navigate = useNavigate();
       const userInfo = action.payload;
 
       state.user = userInfo;
