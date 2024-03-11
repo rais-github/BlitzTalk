@@ -1,7 +1,9 @@
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
+import { Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
@@ -18,6 +20,8 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
+import ProfileModal from "./ProfileModal";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -49,7 +53,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
@@ -60,27 +63,36 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function PrimarySearchAppBar() {
+  const navigate = useNavigate();
+
+  const logoutHandler = () => {
+    localStorage.removeItem("userInfo");
+    setAnchorElUser(null);
+    setAnchorEl(null);
+    handleMobileMenuClose();
+    navigate("/");
+  };
+  const settings = ["Profile", "Logout"];
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const user = useSelector((state) => state.chat.user);
 
   const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
-  const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
-  };
-
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
+    // setAnchorElUser(null)
   };
 
   const menuId = "primary-search-account-menu";
@@ -101,10 +113,19 @@ export default function PrimarySearchAppBar() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={logoutHandler}>Logout</MenuItem>
     </Menu>
   );
 
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+  };
+
+  const handleMobileMenuOpen = (event) => {
+    setMobileMoreAnchorEl(event.currentTarget);
+  };
   const mobileMenuId = "primary-search-account-menu-mobile";
   const renderMobileMenu = (
     <Menu
@@ -122,14 +143,14 @@ export default function PrimarySearchAppBar() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
+      {/* <MenuItem>
         <IconButton size="large" aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="error">
             <MailIcon />
           </Badge>
-        </IconButton>
-        {/* <h1 className="text-9xl">Hello</h1> */}
-      </MenuItem>
+        </IconButton> */}
+      {/* <h1 className="text-9xl">Hello</h1> */}
+      {/* </MenuItem> */}
       <MenuItem>
         <IconButton
           size="large"
@@ -159,25 +180,8 @@ export default function PrimarySearchAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" color="warning">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ display: { xs: "none", sm: "block" } }}
-          >
-            BlitzTalk
-          </Typography>
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
@@ -187,9 +191,17 @@ export default function PrimarySearchAppBar() {
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
+          <Typography
+            variant="h5"
+            noWrap
+            component="div"
+            sx={{ display: { xs: "none", sm: "block" }, marginLeft: "17em" }}
+          >
+            BlitzTalk
+          </Typography>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton
+            {/* <IconButton
               size="large"
               aria-label="show 4 new mails"
               color="inherit"
@@ -197,27 +209,49 @@ export default function PrimarySearchAppBar() {
               <Badge badgeContent={4} color="error">
                 <MailIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <IconButton
               size="large"
               aria-label="show 17 new notifications"
               color="inherit"
+              sx={{ marginRight: "1em" }}
             >
               <Badge badgeContent={17} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={user.name} src={user.pic} />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                <ProfileModal user={user}>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">{settings[0]}</Typography>
+                  </MenuItem>
+                </ProfileModal>
+                <MenuItem onClick={logoutHandler}>
+                  <Typography textAlign="center">{settings[1]}</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton

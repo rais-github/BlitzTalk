@@ -36,6 +36,7 @@ const SideSeachPanel = () => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
+  const user = useSelector((state) => state.chat.user);
   const navigate = useNavigate();
 
   const logoutHandler = () => {
