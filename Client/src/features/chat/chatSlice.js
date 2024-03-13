@@ -5,7 +5,7 @@ const initialState = {
   selectedChat: null,
   user: JSON.parse(localStorage.getItem("userInfo")) || null,
   notification: [],
-  chats: null,
+  chats: [],
 };
 
 export const chatSlice = createSlice({
@@ -22,10 +22,11 @@ export const chatSlice = createSlice({
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
     },
     setNotification: (state, action) => {
-      state.notification = action.payload;
+      state.notification = [...state.notification, action.payload];
     },
+
     setChats: (state, action) => {
-      state.chats = action.payload;
+      state.chats = [...state.chats, action.payload];
     },
   },
 });

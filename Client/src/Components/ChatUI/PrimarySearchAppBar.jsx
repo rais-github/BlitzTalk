@@ -1,7 +1,7 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
-import { Tooltip } from "@mui/material";
+import { Drawer, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Toolbar from "@mui/material/Toolbar";
@@ -22,6 +22,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import ProfileModal from "./ProfileModal";
+import CustomDrawer from "./CustomDrawer";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -63,6 +64,15 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function PrimarySearchAppBar() {
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
   const navigate = useNavigate();
 
   const logoutHandler = () => {
@@ -112,7 +122,7 @@ export default function PrimarySearchAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleMenuClose}>View Profile</MenuItem>
       <MenuItem onClick={logoutHandler}>Logout</MenuItem>
     </Menu>
   );
@@ -143,14 +153,6 @@ export default function PrimarySearchAppBar() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {/* <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton> */}
-      {/* <h1 className="text-9xl">Hello</h1> */}
-      {/* </MenuItem> */}
       <MenuItem>
         <IconButton
           size="large"
@@ -179,29 +181,31 @@ export default function PrimarySearchAppBar() {
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" color="warning">
-        <Toolbar>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
-          <Typography
-            variant="h5"
-            noWrap
-            component="div"
-            sx={{ display: { xs: "none", sm: "block" }, marginLeft: "17em" }}
-          >
-            BlitzTalk
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            {/* <IconButton
+    <>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static" color="warning">
+          <Toolbar>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                onClick={handleDrawerOpen}
+                placeholder="Search…"
+                inputProps={{ "aria-label": "search" }}
+              />
+            </Search>
+            <Typography
+              variant="h5"
+              noWrap
+              component="div"
+              sx={{ display: { xs: "none", sm: "block" }, marginLeft: "17em" }}
+            >
+              BlitzTalk
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
+            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+              {/* <IconButton
               size="large"
               aria-label="show 4 new mails"
               color="inherit"
@@ -210,85 +214,67 @@ export default function PrimarySearchAppBar() {
                 <MailIcon />
               </Badge>
             </IconButton> */}
-            <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
-              sx={{ marginRight: "1em" }}
-            >
-              <Badge badgeContent={17} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name} src={user.pic} />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+                sx={{ marginRight: "1em" }}
               >
-                <ProfileModal user={user}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{settings[0]}</Typography>
+                <Badge badgeContent={17} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar alt={user.name} src={user.pic} />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  <ProfileModal user={user}>
+                    <MenuItem onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center">{settings[0]}</Typography>
+                    </MenuItem>
+                  </ProfileModal>
+                  <MenuItem onClick={logoutHandler}>
+                    <Typography textAlign="center">{settings[1]}</Typography>
                   </MenuItem>
-                </ProfileModal>
-                <MenuItem onClick={logoutHandler}>
-                  <Typography textAlign="center">{settings[1]}</Typography>
-                </MenuItem>
-              </Menu>
+                </Menu>
+              </Box>
             </Box>
-          </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={mobileMenuId}
-              aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
-              color="inherit"
-            >
-              <MoreIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      {renderMobileMenu}
-      {renderMenu}
-    </Box>
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="show more"
+                aria-controls={mobileMenuId}
+                aria-haspopup="true"
+                onClick={handleMobileMenuOpen}
+                color="inherit"
+              >
+                <MoreIcon />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        {renderMobileMenu}
+        {renderMenu}
+      </Box>
+      <CustomDrawer isOpen={isDrawerOpen} onClose={handleDrawerClose} />
+    </>
   );
 }
-
-// <AppBar position="static" color="warning">
-//   <Tooltip title="Search Users to chat" arrow placement="bottom-end">
-//     <IconButton
-//       size="large"
-//       edge="start"
-//       color="inherit"
-//       aria-label="open drawer"
-//       sx={{ mr: 2 }}
-//       onClick={() => handleSearch}
-//     >
-//       <SearchIcon />
-//       <Hidden smDown>
-//         <Typography variant="h6" component="div" sx={{ mr: 2 }}>
-//           Search User
-//         </Typography>
-//       </Hidden>
-//     </IconButton>
-//   </Tooltip>
-// </AppBar>;
