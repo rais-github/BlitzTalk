@@ -1,6 +1,24 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { useNavigate } from "react-router-dom";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+export const fetchChats = createAsyncThunk(
+  "chat/fetchChats",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { user } = getState().chat;
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const response = await axios.get("/api/chat", config);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to fetch chats");
+    }
+  }
+);
 const initialState = {
   selectedChat: null,
   user: JSON.parse(localStorage.getItem("userInfo")) || null,
@@ -28,6 +46,18 @@ export const chatSlice = createSlice({
     setChats: (state, action) => {
       state.chats = [...state.chats, action.payload];
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchChats.pending, (state, action) => {
+        state.chats = [];
+      })
+      .addCase(fetchChats.rejected, (state, action) => {
+        state.chats = [];
+      })
+      .addCase(fetchChats.fulfilled, (state, action) => {
+        state.chats = action.payload;
+      });
   },
 });
 

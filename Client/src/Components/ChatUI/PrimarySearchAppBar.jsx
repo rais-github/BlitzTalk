@@ -122,7 +122,9 @@ export default function PrimarySearchAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>View Profile</MenuItem>
+      <ProfileModal user={user}>
+        <MenuItem onClick={handleMenuClose}>View Profile</MenuItem>
+      </ProfileModal>
       <MenuItem onClick={logoutHandler}>Logout</MenuItem>
     </Menu>
   );
