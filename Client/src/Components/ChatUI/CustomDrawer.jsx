@@ -53,6 +53,7 @@ export default function CustomDrawer({ isOpen, onClose }) {
 
   const accessChat = async (userId) => {
     console.log(userId);
+    // console.log(user);
 
     try {
       setLoadingChat(true);
@@ -63,7 +64,7 @@ export default function CustomDrawer({ isOpen, onClose }) {
         },
       };
       const { data } = await axios.post(`/api/chat`, { userId }, config);
-
+      console.log(data);
       if (!chats.find((c) => c._id === data._id)) dispatch(setChats(data));
       dispatch(setSelectedChat(data));
       setLoadingChat(false);

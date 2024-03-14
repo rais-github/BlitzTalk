@@ -26,7 +26,7 @@ const Chat = () => {
 
   return (
     <Box width="100%">
-      {user && <SideSearchPanel />}
+      {user ? <SideSearchPanel /> : <span>error</span>}
       <Box
         display="flex"
         justifyContent="space-between"

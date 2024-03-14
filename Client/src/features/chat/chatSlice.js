@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchChats = createAsyncThunk(
   "chat/fetchChats",
-  async (_, { getState, rejectWithValue }) => {
+  async ({ getState, rejectWithValue }) => {
     try {
       const { user } = getState().chat;
       const config = {
