@@ -16,8 +16,3 @@ Router.patch("/rename", isLoggedIn, renameGroup);
 Router.put("/groupremove", isLoggedIn, removeFromGroup);
 Router.put("/groupadd", isLoggedIn, addToGroup);
 export default Router;
-<<<<<<< HEAD
-=======
-//comment
-//comment by siddhant
->>>>>>> 1fb74f43a1d5da1c002e5c34e9b3e227d88a9aa8
