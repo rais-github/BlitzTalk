@@ -11,6 +11,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Stack from "@mui/material/Stack";
 import { Typography } from "@mui/material";
 import { getSender } from "../../Helpers/chatHelpers";
+import UserComponent from "./1V1";
 
 const MyChat = ({ fetchAgain }) => {
   const [loggedInUser, setLoggedInUser] = React.useState();
@@ -108,9 +109,13 @@ const MyChat = ({ fetchAgain }) => {
                   borderRadius={10}
                 >
                   <Typography>
-                    {!chat.isGroupChat
-                      ? getSender(loggedInUser, chat.users)
-                      : chat.chatName}
+                    {!chat.isGroupChat ? (
+                      <UserComponent
+                        user={getSender(loggedInUser, chat.users)}
+                      />
+                    ) : (
+                      chat.chatName
+                    )}
                   </Typography>
                 </Box>
               ))}
