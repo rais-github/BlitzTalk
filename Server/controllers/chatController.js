@@ -83,8 +83,8 @@ const fetchChats = asyncHandler(async (req, res) => {
 
 const createGroupChat = asyncHandler(async (req, res) => {
   try {
-    const { users, name } = req.body;
-
+    const { users: usersString, name } = req.body;
+    const users = JSON.parse(usersString);
     if (!users || !name) {
       return res
         .status(400)
@@ -96,7 +96,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
         .status(400)
         .json("A minimum of two users is required to create a group chat");
     }
-
+    console.log(Array.isArray(users));
     users.push(req.user);
 
     const groupChat = await Chat.create({
@@ -113,7 +113,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
     res.status(200).json(fullGroupChat);
   } catch (error) {
     console.error("Error creating group chat:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Error creating group chat" });
   }
 });
 
