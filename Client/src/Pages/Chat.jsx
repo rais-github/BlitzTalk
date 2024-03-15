@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "../features/chat/chatSlice.js";
 import { Box } from "@mui/material";
-import { SideSearchPanel, MyChat, ChatBox } from "../Components";
+import {
+  SideSearchPanel,
+  PrimarySearchAppBar,
+  MyChat,
+  ChatBox,
+} from "../Components";
 
 const Chat = () => {
   const [fetchAgain, setFetchAgain] = useState(false);
@@ -26,7 +31,7 @@ const Chat = () => {
 
   return (
     <Box width="100%">
-      {user ? <SideSearchPanel /> : <span>error</span>}
+      {user ? <PrimarySearchAppBar /> : <span>error</span>}
       <Box
         display="flex"
         justifyContent="space-between"

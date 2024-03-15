@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export const fetchChats = createAsyncThunk(
   "chat/fetchChats",
-  async ({ getState, rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
       const { user } = getState().chat;
       const config = {
@@ -19,6 +20,7 @@ export const fetchChats = createAsyncThunk(
     }
   }
 );
+
 const initialState = {
   selectedChat: null,
   user: JSON.parse(localStorage.getItem("userInfo")) || null,

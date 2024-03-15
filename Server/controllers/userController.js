@@ -37,7 +37,7 @@ const allUsers = asyncHandler(async (req, res, next) => {
       ? {
           $or: [
             { name: { $regex: key, $options: "i" } },
-            { email: { $regex: key, $options: "i" } },
+            // { email: { $regex: key, $options: "i" } },
           ],
         }
       : {};
