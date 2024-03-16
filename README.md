@@ -64,7 +64,7 @@ The potential opportunities and areas of growth and development for BlitzTalk in
 
 3. Run our service
    ```bash
-   npm run start
+   npm run dev
    ```
 
 Stay with us as the future awaits for you
