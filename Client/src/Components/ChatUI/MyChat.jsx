@@ -39,7 +39,7 @@ const MyChat = ({ fetchAgain }) => {
     <>
       <Box
         sx={{
-          display: selectedChat ? "none" : "flex",
+          display: { xs: selectedChat ? "none" : "flex", md: "flex" },
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
