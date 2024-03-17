@@ -7,4 +7,12 @@ function getSender(loggedInUser, users) {
   }
 }
 
-export { getSender };
+function getSenderFull(loggedInUser, users) {
+  if (loggedInUser._id === users[0]._id) {
+    return users[1];
+  } else {
+    return users[0];
+  }
+}
+
+export { getSender, getSenderFull };

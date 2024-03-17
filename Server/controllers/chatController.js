@@ -202,7 +202,7 @@ const removeFromGroup = asyncHandler(async (req, res, next) => {
   const { chatId, userId } = req.body;
 
   try {
-    const loggedInUser = req.user._id;
+    const loggedInUserId = req.user._id;
 
     const currentChat = await Chat.findById(chatId);
 
@@ -212,13 +212,17 @@ const removeFromGroup = asyncHandler(async (req, res, next) => {
 
     const groupAdministrator = currentChat.groupAdmin;
 
-    if (groupAdministrator.toString() !== loggedInUser.toString()) {
+    if (groupAdministrator.toString() !== loggedInUserId.toString()) {
       throw new ExpressError(
         403,
-        "You are not authorized to add users to the group"
+        "You are not authorized to remove users from the group"
       );
     }
 
+    // Check if the user to be removed is the admin
+    const isUserAdmin = groupAdministrator.toString() === userId.toString();
+
+    // Update chat by removing the user
     const updatedChat = await Chat.findByIdAndUpdate(
       chatId,
       { $pull: { users: userId } },
@@ -230,9 +234,23 @@ const removeFromGroup = asyncHandler(async (req, res, next) => {
     if (!updatedChat) {
       res.status(404);
       throw new Error("Chat Not Found");
-    } else {
-      res.json(updatedChat);
     }
+
+    // If the user removed was the admin, assign a new admin from remaining users
+    if (isUserAdmin) {
+      const remainingUsers = updatedChat.users.map((user) =>
+        user._id.toString()
+      );
+
+      // Exclude the user who left and set the first user from the remaining as admin
+      const newAdminId = remainingUsers.filter((id) => id !== userId)[0];
+
+      updatedChat.groupAdmin = newAdminId;
+
+      await updatedChat.save();
+    }
+
+    res.json(updatedChat);
   } catch (error) {
     res.status(error.statusCode || 500).json({ error: error.message });
     next(error);
