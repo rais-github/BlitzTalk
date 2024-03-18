@@ -38,7 +38,7 @@ const Chatbox = ({ fetchAgain, setFetchAgain }) => {
         <Box
           sx={{
             margin: "auto",
-            display: "flex",
+            display: { xs: selectedChat ? "flex" : "none", md: "flex" },
             justifyContent: "center",
             alignItems: "center",
             height: "100%",

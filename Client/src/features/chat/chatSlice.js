@@ -42,7 +42,7 @@ export const chatSlice = createSlice({
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
     },
     setNotification: (state, action) => {
-      state.notification = [...state.notification, action.payload];
+      state.notification = [action.payload, ...state.notification];
     },
 
     setChats: (state, action) => {

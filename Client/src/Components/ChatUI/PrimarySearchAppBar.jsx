@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import { Drawer, Tooltip } from "@mui/material";
@@ -20,10 +21,9 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
 import ProfileModal from "./ProfileModal";
 import CustomDrawer from "./CustomDrawer";
-
+import { setNotification } from "../../features/chat/chatSlice";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -63,7 +63,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+let badgeContent = 0;
+
 export default function PrimarySearchAppBar() {
+  const dispatch = useDispatch();
+  const notifications = useSelector((state) => state.chat.notification);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   const handleDrawerOpen = () => {
@@ -161,7 +165,10 @@ export default function PrimarySearchAppBar() {
           aria-label="show 17 new notifications"
           color="inherit"
         >
-          <Badge badgeContent={17} color="error">
+          <Badge
+            badgeContent={notifications.length ? notifications.length : 0}
+            color="error"
+          >
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -222,7 +229,10 @@ export default function PrimarySearchAppBar() {
                 color="inherit"
                 sx={{ marginRight: "1em" }}
               >
-                <Badge badgeContent={17} color="error">
+                <Badge
+                  badgeContent={notifications ? notifications.length : 0}
+                  color="error"
+                >
                   <NotificationsIcon />
                 </Badge>
               </IconButton>

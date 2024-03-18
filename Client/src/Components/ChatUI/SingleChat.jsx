@@ -21,11 +21,21 @@ import ProfileModal from "./ProfileModal";
 import UpdateGroupChatModal from "./GroupUI/UpdateGroupChatModal";
 import ScrollableFeed from "./ScrollableFeed";
 import Lottie from "react-lottie";
+import typingOptions from "../../json/typing.json";
 import axios from "axios";
 import io from "socket.io-client";
 const ENDPOINT = "http://localhost:8080";
-let socket, selectedChatCompare;
+let socket, selectedChatCompare, typingTimeout;
+const TYPING_TIMEOUT = 1700;
+const defaultOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: typingOptions,
 
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,6 +48,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   );
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
+  }, []);
   const fetchMessages = async () => {
     if (!selectedChat) return;
 
@@ -58,7 +75,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       setMessages(data);
       setLoading(false);
 
-      // socket.emit("join chat", selectedChat._id);
+      socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toast("Failed to fetch messages", {
         autoClose: 3000,
@@ -72,6 +89,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (newMessage.trim() === "") return;
+      socket.emit("stop typing", selectedChat._id);
       const message = {
         content: newMessage,
         chatId: selectedChat._id,
@@ -86,6 +104,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
         const res = await axios.post("/api/message", message, config);
         // console.log(res.data);
+        socket.emit("new message", res.data);
         setMessages([...messages, res.data]);
         setNewMessage("");
       } catch (err) {
@@ -95,18 +114,58 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
-  useEffect(() => {
-    socket = io(ENDPOINT);
-  }, []);
-
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
+
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   useEffect(() => {
     fetchMessages();
-  }, [selectedChat, fetchAgain]);
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
 
+  useEffect(() => {
+    if (!socket) return;
+    // console.log("socket", socket);
+    socket.on("message recieved", (newMessage) => {
+      console.log("newMessage", newMessage);
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessage.chat._id
+      ) {
+        if (!notification.includes(newMessage)) {
+          console.log("some", newMessage);
+          dispatch(setNotification(newMessage));
+          setFetchAgain(!fetchAgain);
+        }
+      } else {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      socket.off("message recieved");
+    };
+  });
+  console.log(notification, "notification");
+  // console.log(messages, "messages");
   return (
     <>
       {selectedChat && (
@@ -181,6 +240,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               </div>
             )}
             <FormControl onKeyDown={sendMessage} required sx={{ mt: 3 }}>
+              {istyping && (
+                <Lottie
+                  options={defaultOptions}
+                  // height={50}
+                  width={70}
+                  style={{ marginBottom: 15, marginLeft: 0 }}
+                />
+              )}
               <Input
                 variant="filled"
                 placeholder="Type a message"
