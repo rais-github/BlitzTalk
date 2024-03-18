@@ -1,8 +1,6 @@
-// if (process.env.NODE_ENV != "production") {
-//   const dotenv = require("dotenv").config();
-// }
 import express from "express";
 import dotenv from "dotenv";
+import { Server as socketIOServer } from "socket.io"; // Corrected import statement
 import mongoose from "mongoose";
 import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";
@@ -17,7 +15,7 @@ const MONGO_URL =
 
 const app = express();
 app.use(express.json());
-app.use(cors("*"));
+app.use(cors());
 
 main()
   .then(() => {
@@ -25,7 +23,7 @@ main()
   })
   .catch((err) => {
     console.error("Error connecting to the database:", err);
-    process.exit(1); // Exit the process if the database connection fails
+    process.exit(1);
   });
 
 async function main() {
@@ -49,6 +47,29 @@ app.use((err, req, res, next) => {
   res.status(statusCode).send(message);
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server responding on Port: ${PORT}`);
+});
+
+// Use the correct import to create the socket.io server instance
+const io = new socketIOServer(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("New connection");
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+  socket.on("join", (data) => {
+    console.log(data);
+    socket.join(data.room);
+  });
+  socket.on("message", (data) => {
+    console.log(data);
+    socket.to(data.room).emit("message", data);
+  });
 });

@@ -22,6 +22,9 @@ import UpdateGroupChatModal from "./GroupUI/UpdateGroupChatModal";
 import ScrollableFeed from "./ScrollableFeed";
 import Lottie from "react-lottie";
 import axios from "axios";
+import io from "socket.io-client";
+const ENDPOINT = "http://localhost:8080";
+let socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
@@ -91,6 +94,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       }
     }
   };
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+  }, []);
+
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
   };
