@@ -1,4 +1,5 @@
 import { ArrowBack } from "@mui/icons-material";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
@@ -18,6 +19,7 @@ import {
 } from "@mui/material";
 import { getSender, getSenderFull } from "../../Helpers/chatHelpers";
 import ProfileModal from "./ProfileModal";
+import AmountInput from "../Payment/AmountInput";
 import UpdateGroupChatModal from "./GroupUI/UpdateGroupChatModal";
 import ScrollableFeed from "./ScrollableFeed";
 import Lottie from "react-lottie";
@@ -43,6 +45,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
+  const [showAmountInput, setShowAmountInput] = useState(false);
   const { user, selectedChat, notification } = useSelector(
     (state) => state.chat
   );
@@ -143,21 +146,25 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   useEffect(() => {
     if (!socket) return;
     // console.log("socket", socket);
-    socket.on("message recieved", (newMessage) => {
-      console.log("newMessage", newMessage);
-      if (
-        !selectedChatCompare ||
-        selectedChatCompare._id !== newMessage.chat._id
-      ) {
-        if (!notification.includes(newMessage)) {
-          console.log("some", newMessage);
-          dispatch(setNotification(newMessage));
-          setFetchAgain(!fetchAgain);
+    socket.on(
+      "message recieved",
+      (newMessage) => {
+        console.log("newMessage", newMessage);
+        if (
+          !selectedChatCompare ||
+          selectedChatCompare._id !== newMessage.chat._id
+        ) {
+          if (!notification.includes(newMessage)) {
+            console.log("some", newMessage);
+            dispatch(setNotification(newMessage));
+            setFetchAgain(!fetchAgain);
+          }
+        } else {
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
         }
-      } else {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
+      },
+      [fetchAgain, setFetchAgain]
+    );
 
     // Cleanup function
     return () => {
@@ -166,6 +173,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   });
   console.log(notification, "notification");
   // console.log(messages, "messages");
+
   return (
     <>
       {selectedChat && (
@@ -191,11 +199,43 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             </IconButton>
             {!selectedChat.isGroupChat ? (
               <>
+                <IconButton
+                  sx={{
+                    backgroundColor: "#c9e7c9",
+                    "&:hover": {
+                      backgroundColor: "#a1d7a1",
+                      transform: "scale(1.05)",
+                    },
+                    "&:focus": {
+                      backgroundColor: "#a1d7a1",
+                      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
+                    },
+                  }}
+                  onClick={setShowAmountInput(!showAmountInput)}
+                >
+                  <CurrencyRupeeIcon style={{ fontSize: 19 }} />
+                </IconButton>
                 {getSender(user, selectedChat.users)}
                 <ProfileModal user={getSenderFull(user, selectedChat.users)} />
               </>
             ) : (
               <>
+                <IconButton
+                  sx={{
+                    backgroundColor: "#c9e7c9",
+                    "&:hover": {
+                      backgroundColor: "#a1d7a1",
+                      transform: "scale(1.05)",
+                    },
+                    "&:focus": {
+                      backgroundColor: "#a1d7a1",
+                      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
+                    },
+                  }}
+                  onClick={() => handleAmountInput(selectedChat.isGroupChat)}
+                >
+                  <CurrencyRupeeIcon style={{ fontSize: 20 }} />
+                </IconButton>
                 {selectedChat.chatName.toUpperCase()}
                 {
                   <UpdateGroupChatModal

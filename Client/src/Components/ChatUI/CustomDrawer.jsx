@@ -94,7 +94,7 @@ export default function CustomDrawer({ isOpen, onClose }) {
       </Backdrop>
       <Box
         sx={{
-          width: 250,
+          width: 310,
           zIndex: (theme) => theme.zIndex.drawer,
           backgroundColor: "#fff",
           boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",

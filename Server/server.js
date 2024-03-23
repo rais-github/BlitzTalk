@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { Server as socketIOServer } from "socket.io"; // Corrected import statement
+import { Server as socketIOServer } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";

@@ -216,11 +216,11 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 400,
+              width: 390,
               bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 8,
+              boxShadow: 29,
+              p: 2,
+              borderRadius: 5,
               textAlign: "center",
               display: "flex",
               flexDirection: "column",
@@ -249,18 +249,10 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
             <div className="flex items-center justify-between mt-4">
               <TextField
                 placeholder="Chat Name"
-                className="w-2/3 mr-2"
+                className="w-full"
                 value={groupChatName}
                 onChange={(e) => setGroupChatName(e.target.value)}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={!groupChatName || renameloading}
-                onClick={handleRename}
-              >
-                Update
-              </Button>
             </div>
             <div className="mt-4">
               <TextField
@@ -283,13 +275,21 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                 ))}
               </div>
             )}
-            <div className="flex flex-col items-center mt-4">
+            <div className="flex gap-4 items-center mt-4">
               <Button
                 onClick={() => handleRemove(user)}
                 variant="contained"
                 color="error"
               >
                 Leave Group
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!groupChatName || renameloading}
+                onClick={handleRename}
+              >
+                Update
               </Button>
             </div>
           </Box>
