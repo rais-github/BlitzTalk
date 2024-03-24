@@ -173,7 +173,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   });
   console.log(notification, "notification");
   // console.log(messages, "messages");
-
+  const handleCurrencyIconClick = () => {
+    setShowAmountInput(true);
+  };
   return (
     <>
       {selectedChat && (
@@ -211,7 +213,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                       boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
                     },
                   }}
-                  onClick={setShowAmountInput(!showAmountInput)}
+                  onClick={handleCurrencyIconClick}
                 >
                   <CurrencyRupeeIcon style={{ fontSize: 19 }} />
                 </IconButton>
@@ -232,7 +234,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                       boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
                     },
                   }}
-                  onClick={() => handleAmountInput(selectedChat.isGroupChat)}
+                  onClick={handleCurrencyIconClick}
                 >
                   <CurrencyRupeeIcon style={{ fontSize: 20 }} />
                 </IconButton>
@@ -301,6 +303,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             </FormControl>
           </Box>
         </div>
+      )}
+      {showAmountInput && (
+        <AmountInput
+          isGroupChat={selectedChat.isGroupChat}
+          onClose={() => setShowAmountInput(false)}
+        />
       )}
     </>
   );
