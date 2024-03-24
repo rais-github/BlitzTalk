@@ -9,12 +9,22 @@ import {
 import { Close } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AmountInput = ({ isGroupChat, onClose }) => {
   const [amount, setAmount] = useState("");
 
   const handleAmountChange = (event) => {
     setAmount(event.target.value);
+  };
+
+  const handleFormSubmit = () => {
+    if (amount < 1 || amount === "") {
+      alert("Please enter a valid amount");
+      // toast.error("Please enter a valid amount");
+      return;
+    }
   };
 
   return (
@@ -73,7 +83,7 @@ const AmountInput = ({ isGroupChat, onClose }) => {
                 fullWidth
                 InputProps={{
                   inputProps: {
-                    min: 0,
+                    min: 1,
                     style: {
                       borderRadius: "8px",
                     },
@@ -104,6 +114,7 @@ const AmountInput = ({ isGroupChat, onClose }) => {
                 variant="contained"
                 color="primary"
                 sx={{ width: "100%" }}
+                onClick={handleFormSubmit}
               >
                 Proceed to Payment
               </Button>
