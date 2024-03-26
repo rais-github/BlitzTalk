@@ -6,6 +6,7 @@ import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";
 import userRoute from "./routes/userRoute.js";
 import chatRoute from "./routes/chatRoute.js";
+import stripeRoute from "./routes/stripe.js";
 import messageRoute from "./routes/messageRoute.js";
 dotenv.config();
 

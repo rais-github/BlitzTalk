@@ -66,7 +66,7 @@ const AmountInput = ({ isGroupChat, onClose }) => {
       </DialogTitle>
       <DialogContent dividers>
         {isGroupChat ? (
-          <span className="text-red-500 text-sm mb-4">
+          <span className="text-red-500 text-lg mb-4">
             You are in a group chat. Payments might be visible to all
             participants.
           </span>
