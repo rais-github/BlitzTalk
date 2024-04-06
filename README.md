@@ -30,8 +30,12 @@ The potential opportunities and areas of growth and development for BlitzTalk in
    - React.js for creating a dynamic user interface.
    - Node.js for server-side scripting.
    - Socket.io for real-time communication.
+<<<<<<< HEAD
    - node-nlp for textual emotion detection (exclusive to our app)
    - Chat Translation in real-time (exclusive to our app)
+=======
+   - NLP for textual emotion detection.
+>>>>>>> 65efded5b9f47d1c0d44fec7947c258c62a3b9f6
 
 2. **Development Environment:**
 
@@ -60,7 +64,7 @@ The potential opportunities and areas of growth and development for BlitzTalk in
 2. Install Dependencies:
 
    ```bash
-    npm install
+    npm i
 
    ```
 
