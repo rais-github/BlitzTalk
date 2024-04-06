@@ -1,12 +1,16 @@
 import { ArrowBack } from "@mui/icons-material";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import compromise from "compromise";
+import { SentimentIntensityAnalyzer } from "vader-sentiment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
+import Stack from "@mui/material/Stack";
 import "react-toastify/dist/ReactToastify.css";
 import {
   setSelectedChat,
   setNotification,
+  setEmotion,
 } from "../../features/chat/chatSlice";
 import {
   IconButton,
@@ -18,12 +22,16 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { getSender, getSenderFull } from "../../Helpers/chatHelpers";
+import { detectEmotion } from "../../Helpers/detectEmotion";
 import ProfileModal from "./ProfileModal";
 import AmountInput from "../Payment/AmountInput";
 import UpdateGroupChatModal from "./GroupUI/UpdateGroupChatModal";
 import ScrollableFeed from "./ScrollableFeed";
+import EmoteSwitch from "./EmoteSwitch";
+import TranslateSwitch from "./TranslateSwitch";
 import Lottie from "react-lottie";
 import typingOptions from "../../json/typing.json";
+import { countries } from "../../json/countries";
 import axios from "axios";
 import io from "socket.io-client";
 const ENDPOINT = "http://localhost:8080";
@@ -38,7 +46,14 @@ const defaultOptions = {
     preserveAspectRatio: "xMidYMid slice",
   },
 };
+
+const getLanguageCode = (languageName) => {
+  return countries[languageName] || null;
+};
+
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
+  const [isEmoteOn, setIsEmoteOn] = useState(false);
+  const [isTranslateOn, setIsTranslateOn] = useState(false);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -46,10 +61,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
   const [showAmountInput, setShowAmountInput] = useState(false);
-  const { user, selectedChat, notification } = useSelector(
+  const analyzer = new SentimentIntensityAnalyzer();
+  const { user, selectedChat, notification, emotion } = useSelector(
     (state) => state.chat
   );
   const dispatch = useDispatch();
+  const nlp = compromise;
 
   useEffect(() => {
     socket = io(ENDPOINT);
@@ -93,10 +110,116 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       e.preventDefault();
       if (newMessage.trim() === "") return;
       socket.emit("stop typing", selectedChat._id);
+
+      const senderLanguage = user.language || "English";
+      const senderEmail = user.email;
+      let translatedMessage = newMessage;
+
+      if (selectedChat.users && selectedChat.users.length === 2) {
+        const receiver = selectedChat.users.find(
+          (user) =>
+            user.email !== senderEmail && user.language !== senderLanguage
+        );
+
+        if (receiver && isTranslateOn) {
+          const receiverLanguage = receiver.language;
+          const translateFromCode = getLanguageCode(senderLanguage);
+          const translateToCode = getLanguageCode(receiverLanguage);
+          // console.log("translateFromCode", translateFromCode);
+          // console.log("translateToCode", translateToCode);
+          // console.log("receiverLanguage", receiverLanguage);
+          // console.log("senderLanguage", senderLanguage);
+          if (!translateFromCode || !translateToCode) {
+            console.log("Error: Language codes not found for translation.");
+            return;
+          }
+
+          const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
+            newMessage
+          )}&langpair=${translateFromCode}|${translateToCode}`;
+
+          try {
+            const response = await axios.get(apiUrl);
+            if (
+              response.data &&
+              response.data.responseData &&
+              response.data.responseData.translatedText
+            ) {
+              translatedMessage = response.data.responseData.translatedText;
+            } else {
+              console.log("Translation API response is missing required data.");
+            }
+          } catch (error) {
+            console.log("Error occurred while translating:", error.message);
+            // Handle translation error gracefully, fallback to original message
+            translatedMessage = newMessage;
+          }
+        } else {
+          console.log("No suitable receiver found.");
+        }
+      }
+
+      // console.log("translatedMessage", translatedMessage);
+      // console.log("newMessage", newMessage);
+
+      let messageContent = translatedMessage;
+      let emoji = "";
+      const detectedEmotion = detectEmotion(newMessage);
+
+      switch (detectedEmotion || emotion) {
+        case "hello":
+          emoji = "🙏";
+          break;
+        case "bye":
+          emoji = "👋🏼";
+          break;
+        case "excited":
+          emoji = "🤩";
+          break;
+        case "ashamed":
+          emoji = "😳";
+          break;
+        case "calm":
+          emoji = "😌";
+          break;
+        case "joy":
+          emoji = "😂";
+          break;
+        case "love":
+          emoji = "❤️";
+          break;
+        case "sad":
+          emoji = "😔";
+          break;
+        case "irritated":
+          emoji = "😠";
+          break;
+        case "angry":
+          emoji = "😡";
+          break;
+        case "bored":
+          emoji = "😒";
+          break;
+        case "curious":
+          emoji = "🤔";
+          break;
+        case "blank":
+          emoji = "❓";
+          break;
+        default:
+          emoji = "";
+      }
+
+      if (emoji && isEmoteOn) {
+        // Attach emoji to message content
+        messageContent += ` ${emoji}`;
+      }
+
       const message = {
-        content: newMessage,
+        content: messageContent,
         chatId: selectedChat._id,
       };
+
       try {
         const config = {
           headers: {
@@ -106,7 +229,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         };
 
         const res = await axios.post("/api/message", message, config);
-        // console.log(res.data);
         socket.emit("new message", res.data);
         setMessages([...messages, res.data]);
         setNewMessage("");
@@ -134,6 +256,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       if (timeDiff >= timerLength && typing) {
         socket.emit("stop typing", selectedChat._id);
         setTyping(false);
+        // setMessages([...messages, emotion]);
       }
     }, timerLength);
   };
@@ -149,7 +272,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     socket.on(
       "message recieved",
       (newMessage) => {
-        console.log("newMessage", newMessage);
+        // setEmotion((prevEmotion) => newMessage.answer);
+        console.log("backendEmotion", newMessage.answer);
+        dispatch(setEmotion(newMessage.answer));
         if (
           !selectedChatCompare ||
           selectedChatCompare._id !== newMessage.chat._id
@@ -171,15 +296,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       socket.off("message recieved");
     };
   });
-  console.log(notification, "notification");
-  // console.log(messages, "messages");
+
   const handleCurrencyIconClick = () => {
     setShowAmountInput(true);
   };
   return (
     <>
       {selectedChat && (
-        <div className="w-[100%] , h-[92%] -mt-3.5">
+        <div className="w-full h-[92%] -mt-3.5">
           <Typography
             sx={{
               fontFamily: "Work sans",
@@ -201,51 +325,52 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             </IconButton>
             {!selectedChat.isGroupChat ? (
               <>
-                <IconButton
-                  sx={{
-                    backgroundColor: "#c9e7c9",
-                    "&:hover": {
-                      backgroundColor: "#a1d7a1",
-                      transform: "scale(1.05)",
-                    },
-                    "&:focus": {
-                      backgroundColor: "#a1d7a1",
-                      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
-                    },
-                  }}
-                  onClick={handleCurrencyIconClick}
-                >
-                  <CurrencyRupeeIcon style={{ fontSize: 19 }} />
-                </IconButton>
+                <Stack direction="row" spacing={0} style={{ marginLeft: -21 }}>
+                  <EmoteSwitch
+                    label="Emote"
+                    onClick={(e) => {
+                      console.log("Emote switch clicked");
+                      setIsEmoteOn(!isEmoteOn);
+                    }}
+                    style={{ marginLeft: 5 }}
+                  />
+                  <TranslateSwitch
+                    label="Translate"
+                    onClick={(e) => {
+                      console.log("Translate switch clicked");
+                      setIsTranslateOn(!isTranslateOn);
+                    }}
+                    style={{ marginLeft: 5 }}
+                  />
+                </Stack>
+
                 {getSender(user, selectedChat.users)}
                 <ProfileModal user={getSenderFull(user, selectedChat.users)} />
               </>
             ) : (
               <>
-                <IconButton
-                  sx={{
-                    backgroundColor: "#c9e7c9",
-                    "&:hover": {
-                      backgroundColor: "#a1d7a1",
-                      transform: "scale(1.05)",
-                    },
-                    "&:focus": {
-                      backgroundColor: "#a1d7a1",
-                      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
-                    },
-                  }}
-                  onClick={handleCurrencyIconClick}
-                >
-                  <CurrencyRupeeIcon style={{ fontSize: 20 }} />
-                </IconButton>
+                {/* <IconButton
+                sx={{
+                  backgroundColor: "#c9e7c9",
+                  "&:hover": {
+                    backgroundColor: "#a1d7a1",
+                    transform: "scale(1.05)",
+                  },
+                  "&:focus": {
+                    backgroundColor: "#a1d7a1",
+                    boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
+                  },
+                }}
+                onClick={handleCurrencyIconClick}
+              >
+                <CurrencyRupeeIcon style={{ fontSize: 20 }} />
+              </IconButton> */}
                 {selectedChat.chatName.toUpperCase()}
-                {
-                  <UpdateGroupChatModal
-                    fetchAgain={fetchAgain}
-                    setFetchAgain={setFetchAgain}
-                    fetchMessages={fetchMessages}
-                  />
-                }
+                <UpdateGroupChatModal
+                  fetchAgain={fetchAgain}
+                  setFetchAgain={setFetchAgain}
+                  fetchMessages={fetchMessages}
+                />
               </>
             )}
           </Typography>
@@ -278,7 +403,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 className="flex flex-col overflow-y-scroll "
                 style={{ scrollbarWidth: "none" }}
               >
-                <ScrollableFeed messages={messages} />
+                <ScrollableFeed messages={messages} emotion={emotion} />
               </div>
             )}
             <FormControl onKeyDown={sendMessage} required sx={{ mt: 3 }}>
@@ -291,7 +416,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 />
               )}
               <Input
-                variant="filled"
                 placeholder="Type a message"
                 value={newMessage}
                 onChange={typingHandler}

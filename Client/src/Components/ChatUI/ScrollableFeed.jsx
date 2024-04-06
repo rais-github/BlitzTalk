@@ -10,9 +10,8 @@ import {
   isSameSenderMargin,
 } from "../../Helpers/chatHelpers";
 
-const ScrollableChat = ({ messages }) => {
+const ScrollableChat = ({ messages, emotion, translatedLang = "English" }) => {
   const user = useSelector((state) => state.chat.user);
-
   return (
     <ScrollableFeed forceScroll={true}>
       {messages &&

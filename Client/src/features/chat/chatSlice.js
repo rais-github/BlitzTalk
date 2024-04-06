@@ -26,6 +26,7 @@ const initialState = {
   user: JSON.parse(localStorage.getItem("userInfo")) || null,
   notification: [],
   chats: [],
+  emotion: "",
 };
 
 export const chatSlice = createSlice({
@@ -48,6 +49,9 @@ export const chatSlice = createSlice({
     setChats: (state, action) => {
       state.chats = [...state.chats, action.payload];
     },
+    setEmotion: (state, action) => {
+      state.emotion = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -64,8 +68,13 @@ export const chatSlice = createSlice({
 });
 
 // Export the generated actions
-export const { setSelectedChat, setUser, setNotification, setChats } =
-  chatSlice.actions;
+export const {
+  setSelectedChat,
+  setUser,
+  setNotification,
+  setChats,
+  setEmotion,
+} = chatSlice.actions;
 
 // Export the reducer
 export default chatSlice.reducer;

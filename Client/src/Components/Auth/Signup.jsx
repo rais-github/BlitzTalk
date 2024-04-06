@@ -8,15 +8,16 @@ import {
   InputAdornment,
   IconButton,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff, CloudUpload } from "@mui/icons-material";
-import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [language, setLanguage] = useState(""); // State for storing selected language
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const history = useNavigate();
 
@@ -37,24 +38,23 @@ const Signup = () => {
     setPicLoading(true);
 
     try {
-      if (!name || !email || !password || !confirmpassword) {
+      if (!name || !email || !password || !confirmpassword || !language) {
+        // Check if language is selected
         toast.warning("Please Fill all the Fields", {
           position: toast.POSITION
             ? toast.POSITION.BOTTOM_RIGHT
             : "bottom-right",
-
           autoClose: 4000,
         });
         setPicLoading(false);
         return;
       }
-      console.log(name, email, password);
+
       if (password !== confirmpassword) {
         toast.error("Passwords Do Not Match", {
           position: toast.POSITION
             ? toast.POSITION.BOTTOM_RIGHT
             : "bottom-right",
-
           autoClose: 5000,
         });
         setPicLoading(false);
@@ -73,14 +73,14 @@ const Signup = () => {
           name,
           email,
           password,
+          language, // Include language in the request body
           pic,
         },
         config
       );
-      console.log("data", data);
+
       toast.success("Registration Successful", {
         position: toast.POSITION ? toast.POSITION.BOTTOM_RIGHT : "bottom-right",
-
         autoClose: 5000,
       });
 
@@ -94,7 +94,6 @@ const Signup = () => {
           position: toast.POSITION
             ? toast.POSITION.BOTTOM_RIGHT
             : "bottom-right",
-
           autoClose: 5000,
         }
       );
@@ -113,19 +112,16 @@ const Signup = () => {
         formData.append("cloud_name", "dgvy8j9np");
 
         const response = await axios.post(
-          "https://api.cloudinary.com/v1_1/dgvy8j9np/image/upload",
+          import.meta.env.VITE_CLOUDINARY,
           formData
         );
 
         setPic(response.data.url);
-        console.log(response.data.url);
-        setPicLoading(false);
 
         toast.success("File Uploaded Successfully", {
           position: toast.POSITION
             ? toast.POSITION.BOTTOM_RIGHT
             : "bottom-right",
-
           autoClose: 5000,
         });
       } else {
@@ -133,13 +129,13 @@ const Signup = () => {
       }
     } catch (error) {
       console.error("File upload failed:", error);
-      setPicLoading(false);
 
       toast.error(`Error: ${error.message || "Unknown error"}`, {
         position: toast.POSITION ? toast.POSITION.BOTTOM_RIGHT : "bottom-right",
-
         autoClose: 5000,
       });
+    } finally {
+      setPicLoading(false);
     }
   };
 
@@ -189,6 +185,13 @@ const Signup = () => {
               </IconButton>
             </InputAdornment>
           }
+        />
+      </FormControl>
+      <FormControl fullWidth required>
+        <FormLabel>Language</FormLabel>
+        <Input
+          placeholder="Enter Your Preferred Language"
+          onChange={(e) => setLanguage(e.target.value)}
         />
       </FormControl>
       <FormControl fullWidth>

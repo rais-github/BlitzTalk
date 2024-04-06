@@ -30,6 +30,8 @@ The potential opportunities and areas of growth and development for BlitzTalk in
    - React.js for creating a dynamic user interface.
    - Node.js for server-side scripting.
    - Socket.io for real-time communication.
+   - node-nlp for textual emotion detection (exclusive to our app)
+   - Chat Translation in real-time (exclusive to our app)
 
 2. **Development Environment:**
 

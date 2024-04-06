@@ -4,8 +4,8 @@ import User from "../models/userSchema.js";
 import generateToken from "../utils/generateToken.js";
 
 const registerUser = asyncHandler(async (req, res, next) => {
-  const { name, email, password, pic } = req.body;
-  if (!name || !email || !password) {
+  const { name, email, password, pic, language } = req.body;
+  if (!name || !email || !password || !language) {
     return next(new ExpressError(400, "Please Enter all the fields"));
   }
 
@@ -15,12 +15,13 @@ const registerUser = asyncHandler(async (req, res, next) => {
     return next(new ExpressError(403, "User Already registered"));
   }
 
-  const user = await User.create({ name, email, password, pic });
+  const user = await User.create({ name, email, password, pic, language });
   if (user) {
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      language: user.language,
       pic: user.pic,
       token: generateToken(user._id),
     });
