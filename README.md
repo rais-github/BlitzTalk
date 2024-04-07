@@ -60,7 +60,7 @@ The potential opportunities and areas of growth and development for BlitzTalk in
 2. Install Dependencies:
 
    ```bash
-    npm i
+    npm install
 
    ```
 
