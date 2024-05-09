@@ -20,6 +20,7 @@ The potential opportunities and areas of growth and development for BlitzTalk in
 - Secure user authentication for a personalized experience.
 - Effortless creation and management of chat rooms.
 - Inclusion of essential messaging features for a rich user experience.
+- Chat Translation in real-time (exclusive to our app)
 
 ## Methodology
 
@@ -31,7 +32,6 @@ The potential opportunities and areas of growth and development for BlitzTalk in
    - Node.js for server-side scripting.
    - Socket.io for real-time communication.
    - node-nlp for textual emotion detection (exclusive to our app)
-   - Chat Translation in real-time (exclusive to our app)
 
 2. **Development Environment:**
 
@@ -60,7 +60,7 @@ The potential opportunities and areas of growth and development for BlitzTalk in
 2. Install Dependencies:
 
    ```bash
-    npm i
+    npm install
 
    ```
 
