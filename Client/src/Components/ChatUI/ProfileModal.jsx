@@ -83,6 +83,9 @@ const ProfileModal = ({ user, children }) => {
             <Typography variant="h6" gutterBottom>
               Email: {user.email}
             </Typography>
+            <Typography variant="h6" gutterBottom>
+              Language: {user.language}
+            </Typography>
             <Button onClick={handleClose} variant="contained">
               Close
             </Button>

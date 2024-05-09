@@ -14,13 +14,14 @@ import { Visibility, VisibilityOff, CloudUpload } from "@mui/icons-material";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useDispatch } from "react-redux";
+import { setUser } from "../../features/chat/chatSlice";
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [language, setLanguage] = useState(""); // State for storing selected language
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const history = useNavigate();
-
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [confirmpassword, setConfirmpassword] = useState("");
@@ -85,6 +86,7 @@ const Signup = () => {
       });
 
       localStorage.setItem("userInfo", JSON.stringify(data));
+      dispatch(setUser(data));
       setPicLoading(false);
       history("/chats");
     } catch (error) {

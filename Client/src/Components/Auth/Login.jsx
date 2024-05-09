@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Add this import
+import axios from "axios";
 import {
   Button,
   FormControl,
@@ -13,11 +13,13 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useDispatch } from "react-redux";
+import { setUser } from "../../features/chat/chatSlice";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const navigate = useNavigate(); // Change variable name from 'history' to 'navigate'
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,6 +58,7 @@ const Login = () => {
         });
         // setUser(response.data);
         localStorage.setItem("userInfo", JSON.stringify(response.data));
+        dispatch(setUser(response.data));
         setLoading(false);
         setTimeout(() => navigate("/chats"), 1000);
       } else {
