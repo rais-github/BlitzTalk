@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChats } from "../../../features/chat/chatSlice";
+import { useDebounce } from "../../Hooks/useDebounce";
 import UserListItem from "../../UserAvatar/UserListItem";
 import UserBadgeItem from "../../UserAvatar/UserBadgeItem";
 import { ToastContainer, toast } from "react-toastify";
@@ -18,6 +19,7 @@ import {
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+let handleSearch;
 
 const GroupModal = ({ children }) => {
   const [open, setOpen] = useState(false);
@@ -25,6 +27,7 @@ const GroupModal = ({ children }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
+  const debouncedSearch = useDebounce(search);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chat.chats);
@@ -47,33 +50,36 @@ const GroupModal = ({ children }) => {
     }
     setSelectedUsers([...selectedUsers, userToAdd]);
   };
+  useEffect(() => {
+    handleSearch = async (query) => {
+      setSearch(query);
+      if (!query) {
+        // setSearchResult([]);
+        return;
+      }
+      try {
+        setLoading(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+        const { data } = await axios.get(`/api/user?search=${search}`, config);
+        console.log(data);
+        setLoading(false);
+        setSearchResult(data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error fetching users", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        setLoading(false);
+      }
+    };
 
-  const handleSearch = async (query) => {
-    setSearch(query);
-    if (!query) {
-      // setSearchResult([]);
-      return;
-    }
-    try {
-      setLoading(true);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log(data);
-      setLoading(false);
-      setSearchResult(data);
-    } catch (error) {
-      console.log(error);
-      toast.error("Error fetching users", {
-        position: "top-right",
-        autoClose: 2000,
-      });
-      setLoading(false);
-    }
-  };
+    handleSearch(debouncedSearch);
+  }, [debouncedSearch, user.token]);
 
   const removeUser = (userToRemove) => {
     setSelectedUsers(
