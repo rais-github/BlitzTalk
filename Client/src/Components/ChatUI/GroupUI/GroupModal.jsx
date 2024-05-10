@@ -54,6 +54,7 @@ const GroupModal = ({ children }) => {
     let errorDisplayed = false;
 
     handleSearch = async (query) => {
+      const controller = new AbortController();
       setSearch(query);
       if (!query) {
         // setSearchResult([]);
@@ -65,6 +66,7 @@ const GroupModal = ({ children }) => {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
+          signal: controller.signal,
         };
         const { data } = await axios.get(`/api/user?search=${search}`, config);
         console.log(data);
@@ -72,6 +74,10 @@ const GroupModal = ({ children }) => {
         setSearchResult(data);
         errorDisplayed = false;
       } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log("Request Cancelled", error.message);
+          return;
+        }
         console.log(error);
         if (!errorDisplayed) {
           toast.error("Error fetching users", {
@@ -82,6 +88,9 @@ const GroupModal = ({ children }) => {
         }
         setLoading(false);
       }
+      return () => {
+        controller.abort();
+      };
     };
 
     handleSearch(debouncedSearch);
