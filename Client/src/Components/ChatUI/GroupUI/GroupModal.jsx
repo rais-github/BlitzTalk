@@ -51,6 +51,8 @@ const GroupModal = ({ children }) => {
     setSelectedUsers([...selectedUsers, userToAdd]);
   };
   useEffect(() => {
+    let errorDisplayed = false;
+
     handleSearch = async (query) => {
       setSearch(query);
       if (!query) {
@@ -68,12 +70,16 @@ const GroupModal = ({ children }) => {
         console.log(data);
         setLoading(false);
         setSearchResult(data);
+        errorDisplayed = false;
       } catch (error) {
         console.log(error);
-        toast.error("Error fetching users", {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        if (!errorDisplayed) {
+          toast.error("Error fetching users", {
+            position: "top-right",
+            autoClose: 2000,
+          });
+          errorDisplayed = true;
+        }
         setLoading(false);
       }
     };
