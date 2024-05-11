@@ -4,9 +4,9 @@ import { Server as socketIOServer } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";
+import { detectEmotion } from "./utils/detectEmotion.js";
 import userRoute from "./routes/userRoute.js";
 import chatRoute from "./routes/chatRoute.js";
-import stripeRoute from "./routes/stripe.js";
 import messageRoute from "./routes/messageRoute.js";
 import { NlpManager } from "node-nlp";
 import { trainModel } from "./data.js";
@@ -75,8 +75,7 @@ io.on("connection", (socket) => {
       return;
     }
     const [emotion, answer] = await detectEmotion(newMessageReceived.content);
-
-    // console.log("Emotion: ", emotion, "Answer: ", answer);
+    console.log("Emotion: ", emotion, "Answer: ", answer);
 
     chat.users.forEach((user) => {
       if (user._id !== newMessageReceived.sender._id) {
@@ -104,19 +103,3 @@ main()
     console.error("Error connecting to the database:", err);
     process.exit(1);
   });
-
-// Function to perform emotion detection using the trained NLP model
-async function detectEmotion(text) {
-  const response = await manager.process("en", text);
-  const { classifications, answer } = response;
-  // Convert the object into an array of { intent, score } objects
-  const classificationArray = Object.entries(classifications).map(
-    ([intent, score]) => ({ intent, score })
-  );
-
-  // Find the intent with the highest score
-  const emotion = classificationArray.reduce((prev, current) =>
-    prev.score >= current.score ? prev : current
-  );
-  return [emotion, answer];
-}
