@@ -4,13 +4,10 @@ import { Server as socketIOServer } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
 import ExpressError from "./utils/ExpressError.js";
-import { detectEmotion } from "./utils/detectEmotion.js";
 import userRoute from "./routes/userRoute.js";
 import chatRoute from "./routes/chatRoute.js";
 import messageRoute from "./routes/messageRoute.js";
-import { NlpManager } from "node-nlp";
 import { trainModel } from "./data.js";
-const manager = new NlpManager({ languages: ["en"], forceNER: true });
 
 dotenv.config();
 
@@ -74,9 +71,8 @@ io.on("connection", (socket) => {
       console.log("chat.users not defined");
       return;
     }
-    const [emotion, answer] = await detectEmotion(newMessageReceived.content);
-    console.log("Emotion: ", emotion, "Answer: ", answer);
-
+    const answer = await trainModel(newMessageReceived.content);
+    console.log("Answer: ", answer);
     chat.users.forEach((user) => {
       if (user._id !== newMessageReceived.sender._id) {
         socket.in(user._id).emit("message recieved", {
@@ -97,7 +93,6 @@ io.on("connection", (socket) => {
 main()
   .then(() => {
     console.log("Connection to DB successful");
-    trainModel();
   })
   .catch((err) => {
     console.error("Error connecting to the database:", err);

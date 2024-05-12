@@ -23,7 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "./ProfileModal";
 import CustomDrawer from "./CustomDrawer";
-import { setNotification } from "../../features/chat/chatSlice";
+import { setNotification, setUser } from "../../features/chat/chatSlice";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -85,6 +85,7 @@ export default function PrimarySearchAppBar() {
     setAnchorEl(null);
     handleMobileMenuClose();
     navigate("/");
+    dispatch(setUser(null));
   };
   const settings = ["Profile", "Logout"];
   const [anchorEl, setAnchorEl] = React.useState(null);

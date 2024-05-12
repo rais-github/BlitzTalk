@@ -1,11 +1,12 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedChat } from "../../../features/chat/chatSlice";
 import UserListItem from "../../UserAvatar/UserListItem";
 import UserBadgeItem from "../../UserAvatar/UserBadgeItem";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useDebounce } from "../../Hooks/useDebounce";
 import {
   CircularProgress,
   IconButton,
@@ -22,6 +23,7 @@ import {
   Close as CloseIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
+let handleSearch;
 const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
   const [groupChatName, setGroupChatName] = useState();
   const [search, setSearch] = useState("");
@@ -31,35 +33,56 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
   const [open, setOpen] = useState(false);
   const { user, selectedChat } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
+  const debouncedSearch = useDebounce(search);
   const handleOpenClose = () => {
     setOpen(!open);
   };
 
-  const handleSearch = async (query) => {
-    setSearch(query);
-    if (!query) {
-      return;
-    }
+  useEffect(() => {
+    let errorDisplayed = false;
 
-    try {
-      setLoading(true);
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
+    handleSearch = async (query) => {
+      const controller = new AbortController();
+      setSearch(query);
+      if (!query) {
+        // setSearchResult([]);
+        return;
+      }
+      try {
+        setLoading(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          signal: controller.signal,
+        };
+        const { data } = await axios.get(`/api/user?search=${search}`, config);
+        console.log(data);
+        setLoading(false);
+        setSearchResult(data);
+        errorDisplayed = false;
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log("Request Cancelled", error.message);
+          return;
+        }
+        console.log(error);
+        if (!errorDisplayed) {
+          toast.error("Error fetching users", {
+            position: "top-right",
+            autoClose: 2000,
+          });
+          errorDisplayed = true;
+        }
+        setLoading(false);
+      }
+      return () => {
+        controller.abort();
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log(data);
-      setLoading(false);
-      setSearchResult(data);
-    } catch (error) {
-      toast.error("Failed To Load Search", {
-        autoClose: 4500,
-        position: "bottom-left",
-      });
-      setLoading(false);
-    }
-  };
+    };
+
+    handleSearch(debouncedSearch);
+  }, [debouncedSearch, user.token]);
 
   const handleRename = async () => {
     if (!groupChatName) return;

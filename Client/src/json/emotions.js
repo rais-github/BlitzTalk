@@ -396,6 +396,7 @@ export const emotions = {
     "irritating",
     "annoying",
     "frustrating",
+    "get lost",
   ],
   angry: [
     "angry",

@@ -1,6 +1,6 @@
 import { NlpManager } from "node-nlp";
 // Function to train the NLP model
-export async function trainModel() {
+export async function trainModel(text) {
   const manager = new NlpManager({ languages: ["en"], forceNER: true });
   // Add training data for greetings.hello
   manager.addDocument("en", "hi", "greetings.hello");
@@ -147,4 +147,7 @@ export async function trainModel() {
   // Save the trained model
   await manager.save();
   console.log("Model saved successfully");
+  const response = await manager.process("en", text);
+  const { classifications, answer } = response;
+  return answer;
 }

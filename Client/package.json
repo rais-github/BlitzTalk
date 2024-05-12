@@ -17,7 +17,6 @@
     "@mui/material": "^5.15.12",
     "@mui/system": "^5.15.12",
     "@reduxjs/toolkit": "^2.2.1",
-    "@stripe/stripe-js": "^3.0.10",
     "axios": "^1.6.7",
     "compromise": "^14.13.0",
     "framer-motion": "^11.0.20",

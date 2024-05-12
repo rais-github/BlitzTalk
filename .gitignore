@@ -1,3 +1,4 @@
 .env
 /node_modules
 model.nlp
+/Server/utils/detectEmotion.js

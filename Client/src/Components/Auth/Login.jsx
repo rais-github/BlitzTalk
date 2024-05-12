@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "../../features/chat/chatSlice";
 import {
   Button,
   FormControl,
@@ -13,16 +15,16 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../features/chat/chatSlice";
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.chat.user);
 
   const submitHandler = async () => {
     setLoading(true);
@@ -48,7 +50,7 @@ const Login = () => {
         { email, password },
         config
       );
-
+      console.log("mera ", response.data);
       if (response && response.data) {
         toast.success("Login Successful", {
           autoClose: 5000,
@@ -56,10 +58,10 @@ const Login = () => {
             ? toast.POSITION.BOTTOM_RIGHT
             : "bottom-right",
         });
-        // setUser(response.data);
         localStorage.setItem("userInfo", JSON.stringify(response.data));
         dispatch(setUser(response.data));
         setLoading(false);
+        console.log("user", user);
         setTimeout(() => navigate("/chats"), 1000);
       } else {
         toast.error("Invalid response format", {
