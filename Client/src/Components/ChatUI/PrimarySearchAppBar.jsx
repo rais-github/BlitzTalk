@@ -107,7 +107,6 @@ export default function PrimarySearchAppBar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
-    // setAnchorElUser(null)
   };
 
   const menuId = "primary-search-account-menu";
@@ -215,15 +214,6 @@ export default function PrimarySearchAppBar() {
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              {/* <IconButton
-              size="large"
-              aria-label="show 4 new mails"
-              color="inherit"
-            >
-              <Badge badgeContent={4} color="error">
-                <MailIcon />
-              </Badge>
-            </IconButton> */}
               <IconButton
                 size="large"
                 aria-label="show 17 new notifications"
