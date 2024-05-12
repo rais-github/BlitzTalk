@@ -13,7 +13,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URL =
-  process.env.MONGO_URL || "mongodb://127.0.0.1:27017/BlitzTalk";
+  process.env.ATLAS_URI || "mongodb://127.0.0.1:27017/BlitzTalk";
 
 const app = express();
 app.use(express.json());
